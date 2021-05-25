@@ -1,0 +1,40 @@
+#######################################
+# Syntax Coloring Map For mString
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+mUtoa	KEYWORD2
+mLtoa	KEYWORD2
+mFtoa	KEYWORD2
+buf	KEYWORD2
+length	KEYWORD2
+clear	KEYWORD2
+add	KEYWORD2
+charAt	KEYWORD2
+setCharAt	KEYWORD2
+toInt	KEYWORD2
+toUint	KEYWORD2
+toFloat	KEYWORD2
+c_str	KEYWORD2
+startsWith	KEYWORD2
+substring	KEYWORD2
+split	KEYWORD2
+truncate	KEYWORD2
+remove	KEYWORD2
+toLowerCase	KEYWORD2
+toUpperCase	KEYWORD2
+indexOf	KEYWORD2
+parseBytes	KEYWORD2
+parseInts	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+mString	LITERAL1
