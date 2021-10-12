@@ -411,6 +411,40 @@ public:
             c++;
         }
     }
+    //cast operators
+    operator const char*(){ // теперь mString автоматом переконвертируется в cstring (const char *) если будет нужно
+        return this->c_str();
+    }
+    /*
+    Пример:
+    void printString(const char * cstr){cout<<cstr;}
+    mString<16> mStr = "Hello";
+    
+        Было:
+        printString(mStr.c_str());
+        Стало:
+        printString(mStr);
+    
+    */
+    
+    operator bool()
+    {
+        return (this->length());
+    }
+    /* Теперь строка может возвращать bool 
+    Пример:
+        Было:
+        if(str.length())
+        {
+            doSomeMagic();
+        }
+        
+        Стало:
+        if(str)
+        {
+            doSomeMagic();
+        }
+    */
 private:
 };
 #endif
