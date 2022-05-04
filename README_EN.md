@@ -1,3 +1,5 @@
+This is an automatic translation, may be incorrect in some places. See sources and examples!
+
 # mString
 SHARP AS DIARRH AND LIGHT AS A FEATHER STRING REPLACEMENT
 - Almost complete analogue of String, but static
