@@ -37,6 +37,7 @@ toUpperCase	KEYWORD2
 indexOf	KEYWORD2
 parseBytes	KEYWORD2
 parseInts	KEYWORD2
+parse	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

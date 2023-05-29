@@ -63,15 +63,12 @@ uint16_t length();                                      // текущий раз
 uint16_t capacity();                                    // максимальный размер (в кол-ве символов)
 void clear();                                           // очистить
 void add( [char / char* / Fchar / числа / String] );    // добавить
+void add_P(PGM_P s);                                    // добавить строку из Flash
 str += [char / char* / Fchar / числа / String];         // добавить
 str = str + [char / char* / Fchar / числа / String];    // суммировать
 str == [char / char* / числа / String];                 // сравнить
 
-void add_P(PGM_P s);        // добавить строку из Flash
 bool equals_P(PGM_P s);     // совпадает со строкой из Flash
-bool startsWith_P(PGM_P s); // начинается со строки из Flash
-
-// Для добавления/сравнения с mString используй str.buf
 
 // Чтение символа по индексу
 str[idx];
@@ -89,26 +86,33 @@ char* c_str();
 
 int32_t toInt(from = 0);        // преобразовать в 32 бит целое начиная с from
 float toFloat(from = 0);        // преобразовать в float начиная с from
+
 bool startsWith(char*);         // начинается с
-void substring(from, to, char* arr); // скопировать с from до to во внешний arr
-void truncate(amount);          // обрезать с конца на amount
-void remove(idx, amount);       // удалить (вырезать) amount символов начиная с idx
+bool startsWith_P(PGM_P s);     // начинается со строки из Flash
+
+void substring(from, to, char* arr);    // скопировать с from до to во внешний arr
+void truncate(amount);                  // обрезать с конца на amount
+void remove(idx, amount);               // удалить (вырезать) amount символов начиная с idx
+
 void toLowerCase();             // преобразовать буквы в нижний регистр
 void toUpperCase();             // преобразовать буквы в верхний регистр
+
 int indexOf(char, from);        // найти символ char, искать начиная с from
-int indexOf(char*, from);       // найти строку char, искать начиная с from
+int indexOf(char[], from);      // найти строку char, искать начиная с from
 
 int split(char* str[], div);    // разделить на строки по разделителю div
 void unsplit(div);              // вернуть разделители после split
 
-// Парсинг пакета, в котором данные разделены разделителем div и оканчиваются символом ter
-int parseBytes(data, len, div, ter);    // распарсить содержимое в массив byte длиной len
-int parseInts(data, len, div, ter);     // распарсить содержимое в массив int длиной len
+// Парсинг пакета, в котором данные разделены разделителем div
+// data - целочисленный массив любого типа
+// bsize - вес типа массива (byte - 1, uint16_t - 2, long - 4)
+// len - размер массива в количестве ячеек
+// div - разделитель
+int parse(void* data, uint8_t bsize, int len, char div = ',');
 
-// div и ter по умолчанию ',' и NULL
-// Например для парсинга таких пакетов: "12,34,56"
-// Кастомные: "12;34;56;78\n"
-// Парсим str.parseBytes(data, len, ';', '\n')
+// устаревшие
+int parseBytes(data, len, div); // распарсить содержимое в массив byte длиной len
+int parseInts(data, len, div);  // распарсить содержимое в массив int длиной len
 ```
 
 <a id="example"></a>
@@ -157,18 +161,18 @@ void setup() {
   Serial.println(test.buf);   // added String
 
   // парсинг
-  test = "1234,2345,3456,4567,5,6";
+  test = "1234,2345,-3456,4567,5,6";
   Serial.println(test.startsWith("lol2"));  // 0
   Serial.println(test.startsWith("1234"));  // 1
   Serial.println(test.indexOf('k'));    // -1
 
-  int data[10];
-  byte get = test.parseInts(data, 10);
+  int16_t data[10];
+  int get = test.parse(data, 2, 10);   // 10 ячеек по 2 байта
   Serial.println(get);    // 6
   Serial.println();
 
   for (int i = 0; i < get; i++) {
-    Serial.println(data[i]);   // 1234 2345 3456 4567 5 6
+    Serial.println(data[i]);   // 1234 2345 -3456 4567 5 6
   }
 
   // поиск
@@ -236,6 +240,7 @@ void loop() {
     - Добавлен режим внешнего буфера
     - Добавлены _P функции для строк из Flash
     - Добавлена unsplit()
+- v1.3 - добавлена универсальная функция parse
 
 <a id="feedback"></a>
 ## Баги и обратная связь

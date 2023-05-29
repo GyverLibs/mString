@@ -19,6 +19,7 @@
     - Добавлен режим внешнего буфера
     - Добавлены _P функции для строк из Flash
     - Добавлена unsplit()
+    v1.3 - добавлена универсальная функция parse
 */
 
 #ifndef _mString_h
@@ -388,40 +389,32 @@ public:
         const char* temp = strstr(buf + fromIndex, ch);
         return (temp == NULL) ? -1 : (temp - buf);
     }
-
-    int parseBytes(byte* data, int len, char div = ',', char ter = '\0') {
-        int b = 0, c = 0;
-        data[b] = 0;
-        while (true) {
-            if (buf[c] == div) {
-                b++;
-                c++;
-                if (b == len) return b;
-                data[b] = 0;
-                continue;
+    
+    uint16_t parse(void* data, uint8_t bsize, int len, char div = ',') {
+        char* bufp = buf;
+        uint16_t idx = 0;
+        while (1) {
+            switch (bsize) {
+            case 1: ((int8_t*)data)[idx++] = atoi(bufp);
+                break;
+            case 2: ((int16_t*)data)[idx++] = atoi(bufp);
+                break;
+            case 4: ((int32_t*)data)[idx++] = atol(bufp);
+                break;
             }
-            if (buf[c] == ter || b == len) return b + 1;
-            data[b] *= 10;
-            data[b] += buf[c] - '0';
-            c++;
+            if (idx == len) return idx;
+            char* cur = strchr(bufp, div);
+            if (cur) bufp = cur + 1;
+            else return idx;
         }
     }
-    int parseInts(int* data, int len, char div = ',', char ter = '\0') {
-        int b = 0, c = 0;
-        data[b] = 0;
-        while (true) {
-            if (buf[c] == div) {
-                b++;
-                c++;
-                if (b == len) return b;
-                data[b] = 0;
-                continue;
-            }
-            if (buf[c] == ter || b == len) return b + 1;
-            data[b] *= 10;
-            data[b] += buf[c] - '0';
-            c++;
-        }
+    
+    // legacy
+    uint16_t parseBytes(uint8_t* data, int len, char div = ',', char ter = '\0') {
+        return parse(data, 1, len, div);
+    }
+    uint16_t parseInts(int* data, int len, char div = ',', char ter = '\0') {
+        return parse(data, 2, len, div);
     }
     
     // cast
