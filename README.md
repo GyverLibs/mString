@@ -41,55 +41,69 @@
 
 <a id="init"></a>
 ## Инициализация
+Библиотека может работать в двух режимах:
+- Внутренний буфер (по умолчанию) - текстовый буфер создаётся внутри объекта `mString<размер>`
+- Внешний буфер - при создании объекта mString передаётся внешний char массив и его размер. Для включения режима внешнего буфера нужно объявить `#define MS_EXTERNAL` перед подключением библиотеки
+
 ```cpp
+// в обычном режиме (внутренний буфер)
+// размер в количестве символов
 mString<размер> str;
+
+// внешний буфер
+// размер в количестве байт (буфер должен быть на 1 длиннее макс. длины текста)
+char buf[размер];
+mString str(buf, размер);
 ```
 
 <a id="usage"></a>
 ## Использование
 ```cpp
-str.length() - текущий размер
-str.clear() - очистить
-str.add( [char / char* / Fchar / числа / String] ) - добавить
-str += [char / char* / Fchar / числа / String] - добавить
-str = str + [char / char* / Fchar / числа / String] - можно суммировать
-str == [char / char* / числа / String] - сравнить
-Для добавления/сравнения с mString используй str.buf
+str.length();                                           // текущий размер
+str.capacity();                                         // максимальный размер (в кол-ве символов)
+str.clear();                                            // очистить
+str.add( [char / char* / Fchar / числа / String] );     // добавить
+str += [char / char* / Fchar / числа / String];         // добавить
+str = str + [char / char* / Fchar / числа / String];    // суммировать
+str == [char / char* / числа / String];                 // сравнить
 
-Чтение символа по индексу
-str[idx]
-str.buf[idx]
-str.charAt(idx)
+// Для добавления/сравнения с mString используй str.buf
 
-Запись символа по индексу
-str[idx] = с
-str.buf[idx] = с
-str.setCharAt(idx, c)
+// Чтение символа по индексу
+str[idx];
+str.buf[idx];
+str.charAt(idx);
 
-Доступ к char буферу
-str.buf
-str.c_str()
+// Запись символа по индексу
+str[idx] = с;
+str.buf[idx] = с;
+str.setCharAt(idx, c);
 
-str.toInt(from) - преобразовать в int начиная с from
-str.toUint(from) - преобразовать в uint начиная с from
-str.toFloat(from) - преобразовать в float начиная с from
-str.startsWith(char*) - начинается с
-str.substring(from, to, char* arr) - скопировать с from до to во внешний arr
-str.truncate(amount) - обрезать с конца на amount
-str.remove(idx, amount) - удалить (вырезать) amount символов начиная с idx
-str.toLowerCase() - преобразовать буквы в нижний регистр
-str.toUpperCase() - преобразовать буквы в верхний регистр
-str.indexOf(char, from) - найти символ char, искать начиная с from
-str.indexOf(char*, from) - найти строку char, искать начиная с from
-str.split(char* str[], div) - разделить на строки по разделителю div
+// Доступ к char буферу
+str.buf;
+str.c_str();
 
-Парсинг пакета, в котором данные разделены разделителем div и оканчиваются символом ter
-str.parseBytes(data, len, div, ter) - распарсить содержимое в массив byte длиной len
-str.parseInts(data, len, div, ter) - распарсить содержимое в массив int длиной len
-div и ter по умолчанию , и NULL
-Например для парсинга таких пакетов: "12,34,56"
-Кастомные: "12;34;56;78\n"
-Парсим str.parseBytes(data, len, ';', '\n')
+str.toInt(from);            // преобразовать в int начиная с from
+str.toUint(from);           // преобразовать в uint начиная с from
+str.toFloat(from);          // преобразовать в float начиная с from
+str.startsWith(char*);      // начинается с
+str.substring(from, to, char* arr); // скопировать с from до to во внешний arr
+str.truncate(amount);       // обрезать с конца на amount
+str.remove(idx, amount);    // удалить (вырезать) amount символов начиная с idx
+str.toLowerCase();          // преобразовать буквы в нижний регистр
+str.toUpperCase();          // преобразовать буквы в верхний регистр
+str.indexOf(char, from);    // найти символ char, искать начиная с from
+str.indexOf(char*, from);   // найти строку char, искать начиная с from
+str.split(char* str[], div);// разделить на строки по разделителю div
+
+// Парсинг пакета, в котором данные разделены разделителем div и оканчиваются символом ter
+str.parseBytes(data, len, div, ter);    // распарсить содержимое в массив byte длиной len
+str.parseInts(data, len, div, ter);     // распарсить содержимое в массив int длиной len
+
+// div и ter по умолчанию ',' и NULL
+// Например для парсинга таких пакетов: "12,34,56"
+// Кастомные: "12;34;56;78\n"
+// Парсим str.parseBytes(data, len, ';', '\n')
 ```
 
 <a id="example"></a>
@@ -206,6 +220,7 @@ void loop() {
 - v1.0
 - v1.1 - разбил утилиты на .h .cpp
 - v1.1.1 - исправлена ошибка компиляции
+- v1.2 - исправлено прибавление uint32_t чисел, добавлен режим внешнего буфера
 
 <a id="feedback"></a>
 ## Баги и обратная связь

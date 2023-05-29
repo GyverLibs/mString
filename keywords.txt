@@ -5,6 +5,7 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
+MS_EXTERNAL	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -26,6 +27,7 @@ c_str	KEYWORD2
 startsWith	KEYWORD2
 substring	KEYWORD2
 split	KEYWORD2
+unsplit	KEYWORD2
 truncate	KEYWORD2
 remove	KEYWORD2
 toLowerCase	KEYWORD2

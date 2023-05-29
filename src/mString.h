@@ -14,6 +14,7 @@
     v1.0 - релиз
     v1.1 - разбил утилиты на .h .cpp
     v1.1.1 - исправлена ошибка компиляции
+    v1.2 - исправлено прибавление uint32_t чисел, добавлен режим внешнего буфера
 */
 
 #ifndef _mString_h
@@ -22,13 +23,32 @@
 #include <Arduino.h>
 #include "utils.h"
 
+#ifndef MS_EXTERNAL
 template < uint16_t _MS_SIZE >
+#endif
 class mString {
 public:
-    char buf[_MS_SIZE];
+
+#ifndef MS_EXTERNAL
+    char buf[_MS_SIZE + 1];
     
     mString() {
         clear();
+    }
+    
+#else
+    char* buf;
+    uint16_t _MS_SIZE = 0;
+    
+    mString(char* nbuf, uint16_t size) {
+        buf = nbuf;
+        _MS_SIZE = size;
+        clear();
+    }
+#endif
+
+    uint16_t capacity() {
+        return _MS_SIZE - 1;
     }
     
     uint16_t length() {
@@ -60,25 +80,29 @@ public:
     }
     mString& add(uint32_t value) {
         char vBuf[11];
-        utoa(value, vBuf, DEC);
+        ultoa(value, vBuf, DEC);
         return add(vBuf);
     }
     mString& add(uint16_t value) {
-        return add((uint32_t)value);
+        char vBuf[6];
+        utoa(value, vBuf, DEC);
+        return add(vBuf);
     }
     mString& add(uint8_t value) {
-        return add((uint32_t)value);
+        return add((uint16_t)value);
     }
     mString& add(int32_t value) {
-        char vBuf[11];
+        char vBuf[12];
         ltoa(value, vBuf, DEC);
         return add(vBuf);
     }
     mString& add(int16_t value) {
-        return add((int32_t)value);
+        char vBuf[7];
+        itoa(value, vBuf, DEC);
+        return add(vBuf);
     }
     mString& add(int8_t value) {
-        return add((int32_t)value);
+        return add((int16_t)value);
     }
     mString& add(double value, int8_t dec = 2) {
         char vBuf[20];
@@ -88,7 +112,7 @@ public:
     mString& add(mString data) {
         return add(data.buf);
     }
-    mString& add(String data) {
+    mString& add(const String& data) {
         return add(data.c_str());
     }
 
@@ -126,7 +150,7 @@ public:
     mString& operator += (mString data) {
         return add(data.buf);
     }
-    mString& operator += (String data) {
+    mString& operator += (const String& data) {
         return add(data);
     }
 
@@ -164,7 +188,7 @@ public:
     mString operator + (mString data) {
         return (*this).add(data);
     }
-    mString operator + (String data) {
+    mString operator + (const String& data) {
         return (*this).add(data);
     }
 
@@ -209,7 +233,7 @@ public:
         clear();
         return add(value);
     }
-    mString& operator = (String data) {
+    mString& operator = (const String& data) {
         clear();
         return add(data);
     }
@@ -252,7 +276,7 @@ public:
     bool operator == (mString data) {
         return !strcmp(buf, data.buf);
     }
-    bool operator == (String data) {
+    bool operator == (const String& data) {
         return !strcmp(buf, data.c_str());
     }
 
@@ -304,6 +328,9 @@ public:
         }
         return j;
     }
+    /*void unsplit(char** ptrs, uint16_t amount, char div = ',') {
+
+    }*/
     void truncate(uint16_t amount) {
         uint16_t len = length();
         if (amount >= len) clear();
