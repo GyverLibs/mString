@@ -14,7 +14,11 @@
     v1.0 - релиз
     v1.1 - разбил утилиты на .h .cpp
     v1.1.1 - исправлена ошибка компиляции
-    v1.2 - исправлено прибавление uint32_t чисел, добавлен режим внешнего буфера
+    v1.2 
+    - Исправлено прибавление uint32_t чисел
+    - Добавлен режим внешнего буфера
+    - Добавлены _P функции для строк из Flash
+    - Добавлена unsplit()
 */
 
 #ifndef _mString_h
@@ -52,31 +56,37 @@ public:
     }
     
     uint16_t length() {
-        return strlen(buf);
+        return _len;
     }
     
     void clear() {
         buf[0] = '\0';
+        _len = 0;
     }
 
     // add
     mString& add(const char c) {
-        int len = length();
-        if (len + 1 >= _MS_SIZE) return *this;
-        buf[len++] = c;
-        buf[len] = '\0';
+        if (length() + 1 >= _MS_SIZE) return *this;
+        buf[_len++] = c;
+        buf[_len] = '\0';
         return *this;
     }
-    mString& add(const char* data) {
-        if (length() + strlen(data) >= _MS_SIZE) return *this;
-        strcat(buf, data);
+    mString& add(const char* str) {
+        uint16_t plen = strlen(str);
+        if (length() + plen >= _MS_SIZE) return *this;
+        strcat(buf, str);
+        _len += plen;
         return *this;
     }
-    mString& add(const __FlashStringHelper *data) {
-        PGM_P p = reinterpret_cast<PGM_P>(data);
-        if (length() + strlen_P(p) >= _MS_SIZE) return *this;
-        strcpy_P(buf + length(), p);
+    mString& add_P(PGM_P pstr) {
+        uint16_t plen = strlen_P(pstr);
+        if (length() + plen >= _MS_SIZE) return *this;
+        strcpy_P(buf + length(), pstr);
+        _len += plen;
         return *this;
+    }
+    mString& add(const __FlashStringHelper *fstr) {
+        return add_P((PGM_P)fstr);
     }
     mString& add(uint32_t value) {
         char vBuf[11];
@@ -237,17 +247,20 @@ public:
         clear();
         return add(data);
     }
-
+    
     // compare
+    bool equals_P(PGM_P pstr) {
+        return !strcmp_P(buf, pstr);
+    }
     bool operator == (const char c) {
-        return (buf[0] == c && buf[1] == 0);
+        return (buf[0] == c && !buf[1]);
     }
     bool operator == (const char* data) {
         return !strcmp(buf, data);
     }
     bool operator == (uint32_t value) {
         char valBuf[11];
-        return !strcmp(buf, utoa(value, valBuf, DEC));
+        return !strcmp(buf, ultoa(value, valBuf, DEC));
     }
     bool operator == (uint16_t value) {
         char valBuf[6];
@@ -258,16 +271,16 @@ public:
         return !strcmp(buf, utoa(value, valBuf, DEC));
     }
     bool operator == (int32_t value) {
-        char valBuf[11];
+        char valBuf[12];
         return !strcmp(buf, ltoa(value, valBuf, DEC));
     }
     bool operator == (int16_t value) {
-        char valBuf[6];
-        return !strcmp(buf, ltoa(value, valBuf, DEC));
+        char valBuf[7];
+        return !strcmp(buf, itoa(value, valBuf, DEC));
     }
     bool operator == (int8_t value) {
-        char valBuf[4];
-        return !strcmp(buf, ltoa(value, valBuf, DEC));
+        char valBuf[5];
+        return !strcmp(buf, itoa(value, valBuf, DEC));
     }
     bool operator == (float value) {
         char valBuf[20];
@@ -293,10 +306,8 @@ public:
     void setCharAt(uint16_t index, char c) {
         buf[index] = c;
     }
+    
     int32_t toInt(uint16_t from = 0) {
-        return atol(buf + from);
-    }
-    uint32_t toUint(uint16_t from = 0) {
         return atol(buf + from);
     }
     float toFloat(uint16_t from = 0) {
@@ -307,7 +318,12 @@ public:
     }
 
     bool startsWith(const char *data, uint16_t offset = 0) {
-        return strlen(data) == strspn(buf + offset, data);
+        uint16_t dlen = strlen(data);
+        return !strncmp(buf + offset, data, dlen);
+    }
+    bool startsWith_P(PGM_P data, uint16_t offset = 0) {
+        uint16_t dlen = strlen_P(data);
+        return !strncmp_P(buf + offset, data, dlen);
     }
 
     void substring(uint16_t from, uint16_t to, char* arr) {
@@ -328,13 +344,15 @@ public:
         }
         return j;
     }
-    /*void unsplit(char** ptrs, uint16_t amount, char div = ',') {
-
-    }*/
-    void truncate(uint16_t amount) {
+    void unsplit(char div = ',') {
         uint16_t len = length();
-        if (amount >= len) clear();
-        else buf[len - amount] = '\0';
+        for (uint16_t i = 0; i < len; i++) {
+            if (!buf[i]) buf[i] = div;
+        }
+    }
+    void truncate(uint16_t amount) {
+        if (amount >= length()) clear();
+        else buf[length() - amount] = '\0';
     }
     void remove(uint16_t index, uint16_t count) {
         uint16_t len = length();
@@ -344,9 +362,9 @@ public:
             count = len - index;
         }
         char *writeTo = buf + index;
-        len = len - count;
+        len -= count;
         strncpy(writeTo, buf + index + count, len - index);
-        buf[len] = 0;
+        buf[len] = '\0';
     }
 
     void toLowerCase() {
@@ -405,40 +423,16 @@ public:
             c++;
         }
     }
-    //cast operators
-    operator const char*(){ // теперь mString автоматом переконвертируется в cstring (const char *) если будет нужно
-        return this->c_str();
+    
+    // cast
+    operator const char*() {
+        return buf;
     }
-    /*
-    Пример:
-    void printString(const char * cstr){cout<<cstr;}
-    mString<16> mStr = "Hello";
-    
-        Было:
-        printString(mStr.c_str());
-        Стало:
-        printString(mStr);
-    
-    */
-    
-    operator bool()
-    {
-        return (this->length());
+    operator bool() {
+        return _len;
     }
-    /* Теперь строка может возвращать bool 
-    Пример:
-        Было:
-        if(str.length())
-        {
-            doSomeMagic();
-        }
-        
-        Стало:
-        if(str)
-        {
-            doSomeMagic();
-        }
-    */
+    
 private:
+    uint16_t _len = 0;
 };
 #endif

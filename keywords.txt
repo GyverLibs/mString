@@ -18,13 +18,15 @@ buf	KEYWORD2
 length	KEYWORD2
 clear	KEYWORD2
 add	KEYWORD2
+add_P	KEYWORD2
+equals_P	KEYWORD2
 charAt	KEYWORD2
 setCharAt	KEYWORD2
 toInt	KEYWORD2
-toUint	KEYWORD2
 toFloat	KEYWORD2
 c_str	KEYWORD2
 startsWith	KEYWORD2
+startsWith_P	KEYWORD2
 substring	KEYWORD2
 split	KEYWORD2
 unsplit	KEYWORD2
