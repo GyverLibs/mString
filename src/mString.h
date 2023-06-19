@@ -21,6 +21,7 @@
     - Добавлена unsplit()
     v1.3 - добавлена универсальная функция parse
     v1.4 - возможность инициализации внешнего буфера без очистки
+    v1.5 - добавлена updateLength()
 */
 
 #ifndef _mString_h
@@ -65,6 +66,10 @@ public:
     void clear() {
         buf[0] = '\0';
         _len = 0;
+    }
+    
+    void updateLength() {
+        _len = strlen(buf);
     }
 
     // add
