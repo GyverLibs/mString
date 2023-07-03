@@ -28,6 +28,7 @@ c_str	KEYWORD2
 startsWith	KEYWORD2
 startsWith_P	KEYWORD2
 substring	KEYWORD2
+splitAmount	KEYWORD2
 split	KEYWORD2
 unsplit	KEYWORD2
 truncate	KEYWORD2

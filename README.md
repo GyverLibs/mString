@@ -120,8 +120,9 @@ void toUpperCase();             // преобразовать буквы в ве
 int indexOf(char, from);        // найти символ char, искать начиная с from
 int indexOf(char[], from);      // найти строку char, искать начиная с from
 
-int split(char* str[], div);    // разделить на строки по разделителю div
-void unsplit(div);              // вернуть разделители после split
+int splitAmount(char div = ',');    // посчитать количество подстрок по разделителю
+int split(char* str[], div = ',');  // разделить на строки по разделителю div
+void unsplit(div);                  // вернуть разделители после split
 
 // Парсинг пакета, в котором данные разделены разделителем div
 // data - целочисленный массив любого типа
@@ -231,7 +232,7 @@ void setup() {
 
   // разделение
   test = "hello,1234,test,5678";
-  char* strings[5];
+  char* strings[test.splitAmount(',')];
   int amount = test.split(strings, ',');
   // действие испортит строку, добавив в неё NULLы!
 
@@ -263,6 +264,7 @@ void loop() {
 - v1.3 - добавлена универсальная функция parse
 - v1.4 - возможность инициализации внешнего буфера без очистки
 - v1.5 - добавлена updateLength()
+- v1.6 - исправлена ошибка на ESP32, добавлена splitAmount()
 
 <a id="feedback"></a>
 ## Баги и обратная связь

@@ -22,6 +22,7 @@
     v1.3 - добавлена универсальная функция parse
     v1.4 - возможность инициализации внешнего буфера без очистки
     v1.5 - добавлена updateLength()
+    v1.6 - исправлена ошибка на ESP32, добавлена splitAmount()
 */
 
 #ifndef _mString_h
@@ -47,10 +48,10 @@ public:
     char* buf;
     uint16_t _MS_SIZE = 0;
     
-    mString(char* nbuf, uint16_t size, bool clear = true) {
+    mString(char* nbuf, uint16_t size, bool clearf = true) {
         buf = nbuf;
         _MS_SIZE = size;
-        if (clear) clear();
+        if (clearf) clear();
         else _len = strlen(buf);
     }
 #endif
@@ -339,6 +340,14 @@ public:
         buf[to] = '\0';
         strcpy(arr, buf + from);
         buf[to] = backup;
+    }
+    int splitAmount(char div = ',') {
+        int count = 1;
+        char* p = buf;
+        do {
+            if (*p == div) count++;
+        } while (*(++p));
+        return count;
     }
     int split(char** ptrs, char div = ',') {
         int i = 0, j = 1;

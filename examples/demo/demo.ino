@@ -1,51 +1,4 @@
 #include "mString.h"
-/*
-  Создание
-  mString<размер> str
-
-  str.length() - текущий размер
-  str.clear() - очистить
-  str.add( [char / char* / Fchar / числа / String] ) - добавить
-  str += [char / char* / Fchar / числа / String] - добавить
-  str = str + [char / char* / Fchar / числа / String] - можно суммировать
-  str == [char / char* / числа / String] - сравнить
-  Для добавления/сравнения с mString используй str.buf
-
-  Чтение символа по индексу
-  str[idx]
-  str.buf[idx]
-  str.charAt(idx)
-
-  Запись символа по индексу
-  str[idx] = с
-  str.buf[idx] = с
-  str.setCharAt(idx, c)
-
-  Доступ к char буферу
-  str.buf
-  str.c_str()
-
-  str.toInt(from) - преобразовать в int начиная с from
-  str.toUint(from) - преобразовать в uint начиная с from
-  str.toFloat(from) - преобразовать в float начиная с from
-  str.startsWith(char*) - начинается с
-  str.substring(from, to, char* arr) - скопировать с from до to во внешний arr
-  str.truncate(amount) - обрезать с конца на amount
-  str.remove(idx, amount) - удалить (вырезать) amount символов начиная с idx
-  str.toLowerCase() - преобразовать буквы в нижний регистр
-  str.toUpperCase() - преобразовать буквы в верхний регистр
-  str.indexOf(char, from) - найти символ char, искать начиная с from
-  str.indexOf(char*, from) - найти строку char, искать начиная с from
-  str.split(char* str[], div) - разделить на строки по разделителю div
-
-  Парсинг пакета, в котором данные разделены разделителем div и оканчиваются символом ter
-  str.parseBytes(data, len, div, ter) - распарсить содержимое в массив byte длиной len
-  str.parseInts(data, len, div, ter) - распарсить содержимое в массив int длиной len
-  div и ter по умолчанию , и NULL
-  Например для парсинга таких пакетов: "12,34,56"
-  Кастомные: "12;34;56;78\n"
-  Парсим str.parseBytes(data, len, ';', '\n')
-*/
 
 void setup() {
   Serial.begin(9600);
@@ -139,13 +92,17 @@ void setup() {
 
   // разделение
   test = "hello,1234,test,5678";
-  char* strings[5];
+  char* strings[test.splitAmount(',')];
+  
   int amount = test.split(strings, ',');
+  // также вернёт количество подстрок (равное splitAmount выше)
   // действие испортит строку, добавив в неё NULLы!
 
   for (int i = 0; i < amount; i++) {
     Serial.println(strings[i]);
   }
+  
+  test.unsplit(',');    // вернуть строку к исходному виду
 }
 
 void loop() {
