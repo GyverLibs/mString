@@ -19,6 +19,7 @@ length	KEYWORD2
 clear	KEYWORD2
 add	KEYWORD2
 add_P	KEYWORD2
+equals	KEYWORD2
 equals_P	KEYWORD2
 charAt	KEYWORD2
 setCharAt	KEYWORD2
@@ -27,6 +28,8 @@ toFloat	KEYWORD2
 c_str	KEYWORD2
 startsWith	KEYWORD2
 startsWith_P	KEYWORD2
+endsWith	KEYWORD2
+endsWith_P	KEYWORD2
 substring	KEYWORD2
 splitAmount	KEYWORD2
 split	KEYWORD2
@@ -36,6 +39,7 @@ remove	KEYWORD2
 toLowerCase	KEYWORD2
 toUpperCase	KEYWORD2
 indexOf	KEYWORD2
+lastIndexOf	KEYWORD2
 parseBytes	KEYWORD2
 parseInts	KEYWORD2
 parse	KEYWORD2

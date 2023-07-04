@@ -23,6 +23,7 @@
     v1.4 - возможность инициализации внешнего буфера без очистки
     v1.5 - добавлена updateLength()
     v1.6 - исправлена ошибка на ESP32, добавлена splitAmount()
+    v1.7 - оптимизация скорости, добавлены add(uint8_t* str, uint16_t len) и endsWith
 */
 
 #ifndef _mString_h
@@ -39,15 +40,15 @@ public:
 
 #ifndef MS_EXTERNAL
     char buf[_MS_SIZE + 1];
-    
+
     mString() {
         clear();
     }
-    
+
 #else
     char* buf;
     uint16_t _MS_SIZE = 0;
-    
+
     mString(char* nbuf, uint16_t size, bool clearf = true) {
         buf = nbuf;
         _MS_SIZE = size;
@@ -59,39 +60,46 @@ public:
     uint16_t capacity() {
         return _MS_SIZE - 1;
     }
-    
+
     uint16_t length() {
         return _len;
     }
-    
+
     void clear() {
         buf[0] = '\0';
         _len = 0;
     }
-    
+
     void updateLength() {
         _len = strlen(buf);
     }
 
     // add
     mString& add(const char c) {
-        if (length() + 1 >= _MS_SIZE) return *this;
-        buf[_len++] = c;
-        buf[_len] = '\0';
+        if (_len + 1 >= _MS_SIZE) return *this;
+        buf[_len] = c;
+        buf[++_len] = '\0';
         return *this;
     }
     mString& add(const char* str) {
-        uint16_t plen = strlen(str);
-        if (length() + plen >= _MS_SIZE) return *this;
-        strcat(buf, str);
-        _len += plen;
+        return add((char*)str, strlen(str));
+    }
+    mString& add(char* str, uint16_t len) {
+        if (_len + len >= _MS_SIZE) return *this;
+        memcpy(buf + _len, str, len);
+        _len += len;
+        buf[_len] = '\0';
         return *this;
     }
+    mString& add(uint8_t* str, uint16_t len) {
+        return add((char*)str, len);
+    }
     mString& add_P(PGM_P pstr) {
-        uint16_t plen = strlen_P(pstr);
-        if (length() + plen >= _MS_SIZE) return *this;
-        strcpy_P(buf + length(), pstr);
-        _len += plen;
+        uint16_t len = strlen_P(pstr);
+        if (_len + len >= _MS_SIZE) return *this;
+        memcpy_P(buf + _len, pstr, len);
+        _len += len;
+        buf[_len] = '\0';
         return *this;
     }
     mString& add(const __FlashStringHelper *fstr) {
@@ -256,8 +264,11 @@ public:
         clear();
         return add(data);
     }
-    
+
     // compare
+    bool equals(const char* str) {
+        return !strcmp(buf, str);
+    }
     bool equals_P(PGM_P pstr) {
         return !strcmp_P(buf, pstr);
     }
@@ -315,7 +326,7 @@ public:
     void setCharAt(uint16_t index, char c) {
         buf[index] = c;
     }
-    
+
     int32_t toInt(uint16_t from = 0) {
         return atol(buf + from);
     }
@@ -326,13 +337,22 @@ public:
         return buf;
     }
 
-    bool startsWith(const char *data, uint16_t offset = 0) {
-        uint16_t dlen = strlen(data);
-        return !strncmp(buf + offset, data, dlen);
+    bool startsWith(const char *str, uint16_t offset = 0) {
+        return !memcmp(buf + offset, str, strlen(str));
     }
-    bool startsWith_P(PGM_P data, uint16_t offset = 0) {
-        uint16_t dlen = strlen_P(data);
-        return !strncmp_P(buf + offset, data, dlen);
+    bool startsWith_P(PGM_P str, uint16_t offset = 0) {
+        return !memcmp_P(buf + offset, str, strlen_P(str));
+    }
+
+    bool endsWith(const char *str) {
+        uint16_t len = strlen(str);
+        if (_len < len) return 0;
+        return !memcmp(buf + _len - len, str, len);
+    }
+    bool endsWith_P(PGM_P str) {
+        uint16_t len = strlen_P(str);
+        if (_len < len) return 0;
+        return !memcmp_P(buf + _len - len, str, len);
     }
 
     void substring(uint16_t from, uint16_t to, char* arr) {
@@ -362,17 +382,17 @@ public:
         return j;
     }
     void unsplit(char div = ',') {
-        uint16_t len = length();
+        uint16_t len = _len;
         for (uint16_t i = 0; i < len; i++) {
             if (!buf[i]) buf[i] = div;
         }
     }
     void truncate(uint16_t amount) {
-        if (amount >= length()) clear();
-        else buf[length() - amount] = '\0';
+        if (amount >= _len) clear();
+        else buf[_len - amount] = '\0';
     }
     void remove(uint16_t index, uint16_t count) {
-        uint16_t len = length();
+        uint16_t len = _len;
         if (index >= len) return;
         if (count <= 0) return;
         if (count > len - index) {
@@ -385,28 +405,42 @@ public:
     }
 
     void toLowerCase() {
-        if (!length()) return;
+        if (!_len) return;
         for (char *p = buf; *p; p++) *p = tolower(*p);
     }
 
     void toUpperCase() {
-        if (!length()) return;
+        if (!_len) return;
         for (char *p = buf; *p; p++) *p = toupper(*p);
     }
 
-    int indexOf(char ch, uint16_t fromIndex = 0) {
-        if (fromIndex >= length()) return -1;
+    int16_t indexOf(char ch, uint16_t fromIndex = 0) {
+        if (fromIndex >= _len) return -1;
         const char* temp = strchr(buf + fromIndex, ch);
         return (temp == NULL) ? -1 : (temp - buf);
     }
 
-    int indexOf(char* ch, uint16_t fromIndex = 0) {
-        if (fromIndex >= length()) return -1;
+    int16_t indexOf(char* ch, uint16_t fromIndex = 0) {
+        if (fromIndex >= _len) return -1;
         const char* temp = strstr(buf + fromIndex, ch);
         return (temp == NULL) ? -1 : (temp - buf);
     }
     
-    uint16_t parse(void* data, uint8_t bsize, int len, char div = ',') {
+    int16_t lastIndexOf(char ch) {
+        return lastIndexOf(ch, _len - 1);
+    }
+    
+    int16_t lastIndexOf(char ch, uint16_t fromIndex) {
+        if (fromIndex >= _len) return -1;
+        char tempchar = buf[fromIndex + 1];
+        buf[fromIndex + 1] = '\0';
+        char* temp = strrchr(buf, ch);
+        buf[fromIndex + 1] = tempchar;
+        if (temp == NULL) return -1;
+        return temp - buf;
+    }
+
+    uint16_t parse(void* data, uint8_t bsize, uint16_t len, char div = ',') {
         char* bufp = buf;
         uint16_t idx = 0;
         while (1) {
@@ -424,7 +458,7 @@ public:
             else return idx;
         }
     }
-    
+
     // legacy
     uint16_t parseBytes(uint8_t* data, int len, char div = ',', char ter = '\0') {
         return parse(data, 1, len, div);
@@ -432,7 +466,7 @@ public:
     uint16_t parseInts(int* data, int len, char div = ',', char ter = '\0') {
         return parse(data, 2, len, div);
     }
-    
+
     // cast
     operator const char*() {
         return buf;
@@ -440,7 +474,7 @@ public:
     operator bool() {
         return _len;
     }
-    
+
 private:
     uint16_t _len = 0;
 };

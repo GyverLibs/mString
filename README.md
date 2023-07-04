@@ -8,6 +8,7 @@
 # mString
 РЕЗКАЯ КАК ПОНОС И ЛЁГКАЯ КАК ПЁРЫШКО ЗАМЕНА STRING
 - Практически полный аналог String, но статический
+- Дополнительные функции для Flash-строк
 - Есть несколько встроенных функций парсинга строк
 
 ### Совместимость
@@ -78,18 +79,28 @@ mString str2(buf2, 10, false);
 <a id="usage"></a>
 ## Использование
 ```cpp
-uint16_t length();                                      // текущий размер
+// =========== СИСТЕМА ===========
+uint16_t length();                                      // текущий размер (в кол-ве символов)
 void updateLength();                                    // пересчитать длину (если строка меняется извне)
 uint16_t capacity();                                    // максимальный размер (в кол-ве символов)
 void clear();                                           // очистить
-void add( [char / char* / Fchar / числа / String] );    // добавить
+
+// ========= ПРИБАВЛЕНИЕ =========
+void add( [char / char* / fstring / числа / String] );  // добавить (почти любой тип данных)
 void add_P(PGM_P s);                                    // добавить строку из Flash
-str += [char / char* / Fchar / числа / String];         // добавить
-str = str + [char / char* / Fchar / числа / String];    // суммировать
-str == [char / char* / числа / String];                 // сравнить
+void add(char* str, uint16_t len);                      // добавить строку из буфера
+void add(uint8_t* str, uint16_t len);                   // добавить строку из буфера
 
-bool equals_P(PGM_P s);     // совпадает со строкой из Flash
+str += [char / char* / fstring / числа / String];       // добавить (почти любой тип данных)
+str = str + [char / char* / fstring / числа / String];  // суммировать (почти любой тип данных)
 
+// ========== СРАВНЕНИЕ ==========
+bool equals(char* s);                       // совпадает со строкой
+bool equals_P(PGM_P s);                     // совпадает со строкой из Flash
+
+str == [char / char* / числа / String];     // сравнить (почти любой тип данных)
+
+// ======= ДОСТУП К БУФЕРУ ========
 // Чтение символа по индексу
 str[idx];
 str.buf[idx];
@@ -104,26 +115,37 @@ str.setCharAt(idx, c);
 char[] buf;
 char* c_str();
 
-int32_t toInt(from = 0);        // преобразовать в 32 бит целое начиная с from
-float toFloat(from = 0);        // преобразовать в float начиная с from
+// =========== ЭКСПОРТ ===========
+int32_t toInt(from = 0);                // в 32 бит целое начиная с from
+float toFloat(from = 0);                // в float начиная с from
+void substring(from, to, char* arr);    // скопировать с from до to во внешний arr
 
-bool startsWith(char*);         // начинается с
+// ======= ПРЕОБРАЗОВАНИЕ ========
+void truncate(amount);          // обрезать с конца на amount
+void remove(idx, amount);       // удалить (вырезать) amount символов начиная с idx
+
+void toLowerCase();             // преобразовать буквы в нижний регистр (ASCII)
+void toUpperCase();             // преобразовать буквы в верхний регистр (ASCII)
+
+// ============ ПОИСК ============
+int indexOf(char, from = 0);    // найти символ char, искать начиная с from
+int indexOf(char*, from = 0);   // найти строку char, искать начиная с from
+
+int lastIndexOf(char);          // найти последний символ char
+int lastIndexOf(char, from);    // найти последний символ char, искать начиная с from
+
+bool startsWith(char* s);       // начинается с
 bool startsWith_P(PGM_P s);     // начинается со строки из Flash
 
-void substring(from, to, char* arr);    // скопировать с from до to во внешний arr
-void truncate(amount);                  // обрезать с конца на amount
-void remove(idx, amount);               // удалить (вырезать) amount символов начиная с idx
+bool endsWith(char *s);         // заканчивается на
+bool endsWith_P(PGM_P s);       // заканчивается на строку из Flash
 
-void toLowerCase();             // преобразовать буквы в нижний регистр
-void toUpperCase();             // преобразовать буквы в верхний регистр
+// ========= РАЗДЕЛЕНИЕ =========
+int splitAmount(char div = ',');        // посчитать количество подстрок по разделителю
+int split(char** str, char div = ',');  // разделить на строки по разделителю div
+void unsplit(char div = ',');           // вернуть разделители после split
 
-int indexOf(char, from);        // найти символ char, искать начиная с from
-int indexOf(char[], from);      // найти строку char, искать начиная с from
-
-int splitAmount(char div = ',');    // посчитать количество подстрок по разделителю
-int split(char* str[], div = ',');  // разделить на строки по разделителю div
-void unsplit(div);                  // вернуть разделители после split
-
+// ========== ПАРСИНГ ==========
 // Парсинг пакета, в котором данные разделены разделителем div
 // data - целочисленный массив любого типа
 // bsize - вес типа массива (byte - 1, uint16_t - 2, long - 4)
@@ -265,6 +287,7 @@ void loop() {
 - v1.4 - возможность инициализации внешнего буфера без очистки
 - v1.5 - добавлена updateLength()
 - v1.6 - исправлена ошибка на ESP32, добавлена splitAmount()
+- v1.7 - оптимизация скорости, добавлены add(uint8_t* str, uint16_t len), lastIndexOf и endsWith
 
 <a id="feedback"></a>
 ## Баги и обратная связь
