@@ -19,14 +19,18 @@ char* mLtoa(int32_t value, char *buffer, bool clear) {
 }
 
 char* mFtoa(double value, int8_t decimals, char *buffer) {
-    int32_t mant = (int32_t)value;
-    value -= mant;
-    uint32_t exp = 1;
-    while (decimals--) exp *= 10;
-    exp *= (float)value;
-    buffer = ltoa(mant, buffer, DEC);
-    byte len = strlen(buffer);
-    *(buffer + len++) = '.';
-    ltoa(exp, buffer + len++, DEC);
-    return buffer;
+  if (value < 0) {
+    value = -value;
+    *buffer++ = '-';
+  }
+  int32_t mant = (int32_t)value;
+  value -= mant;
+  uint32_t exp = 1;
+  while (decimals--) exp *= 10;
+  exp *= (float)value;
+  buffer = ltoa(mant, buffer, DEC);
+  byte len = strlen(buffer);
+  *(buffer + len++) = '.';
+  ltoa(exp, buffer + len++, DEC);
+  return buffer;
 }
