@@ -6,7 +6,7 @@
 
 [![Foo](https://img.shields.io/badge/ПОДПИСАТЬСЯ-НА%20ОБНОВЛЕНИЯ-brightgreen.svg?style=social&logo=telegram&color=blue)](https://t.me/GyverLibs)
 
-|⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️<br><br>**У меня появилась новая библиотека [StringN](https://github.com/GyverLibs/StringN), она легче, быстрее и удобнее**<br><br>⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️|
+|⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️<br><br>**Библиотека архивирована. Инструменты парсинга переехали в библиотеку [StringUtils](https://github.com/GyverLibs/StringUtils), а статический сборщик строки - в библиотеку [StringN](https://github.com/GyverLibs/StringN)**<br><br>⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️|
 | --- |
 
 # mString
